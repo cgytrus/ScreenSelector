@@ -11,6 +11,9 @@ Fully compatible with Mega Hack v6 **(except the "Fullscreen" and "Borderless Fu
 - Lets you select the screen to run GD on (duh) (doesn't work with exclusive fullscreen)
 - Integrates with both vanilla video options and Mega Hack v6
 
+## Installation
+Same as any of the [Mat's mods](https://matcool.github.io/mods) (scroll down to the "Install instructions" section)
+
 ## Compiling
 - Clone the repo recursively (with `--recursive`)
 - Configure CMake (`cmake -G "Visual Studio 16 2019" -B build -DCMAKE_BUILD_TYPE=Release -T host=x86 -A win32`)
