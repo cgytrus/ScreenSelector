@@ -12,7 +12,7 @@ Fully compatible with Mega Hack v6 **(except the "Fullscreen" and "Borderless Fu
 - Integrates with both vanilla video options and Mega Hack v6
 
 ## Installation
-Same as any of the [Mat's mods](https://matcool.github.io/mods) (scroll down to the "Install instructions" section)
+Same as any of the [Mat's mods](https://matcool.github.io/mods#install-instructions)
 
 ## Compiling
 - Clone the repo recursively (with `--recursive`)
