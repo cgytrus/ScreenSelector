@@ -63,7 +63,7 @@ bool FullscreenManager::LoadGameVariables() {
 
     UpdateMonitors();
 
-    _fullscreenMode = (FullscreenMode)gm->getIntGameVariableDefault(fullscreenModeGameVar, (int)FullscreenMode::Windowed);
+    _fullscreenMode = (FullscreenMode)gm->getIntGameVariableDefault(fullscreenModeGameVar, !gm->getGameVariable(vanillaWindowedGameVar)); // default to vanilla setting
     _screen = gm->getIntGameVariableDefault(screenGameVar, 0);
 
     SetFullscreenMode(_fullscreenMode, UpdateMode::Force);
