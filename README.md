@@ -8,7 +8,7 @@ Fully compatible with Mega Hack v6 **(except the "Fullscreen" and "Borderless Fu
 ## Features
 - Saves the screen you quit GD on and reopens it on the same screen when starting up
 - Adds a borderless fullscreen mode
-- Lets you select the screen to run GD on (duh) (doesn't work with exclusive fullscreen)
+- Lets you select the screen to run GD on (duh)
 - Integrates with both vanilla video options and Mega Hack v6
 
 ## Installation
