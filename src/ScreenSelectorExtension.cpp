@@ -10,8 +10,8 @@ bool _initialized = false;
 int _fullscreenModeSelectorIndex = 0;
 int _screenSelectorIndex = 0;
 
-CCLabelBMFont* _fullscreenModeSelectorText;
-CCLabelBMFont* _screenSelectorText;
+int _fullscreenModeSelectorTextIndex;
+int _screenSelectorTextIndex;
 
 ScreenSelectorExtension* ScreenSelectorExtension::Create() {
     auto pRet = static_cast<ScreenSelectorExtension*>(Extension::Create("Screen Selector"));
@@ -63,21 +63,13 @@ void __stdcall ScreenSelectorExtension::ComboBoxCurrentScreenChanged(int index, 
 }
 
 void ScreenSelectorExtension::UpdateFullscreenModeOption() {
-    if(_fullscreenModeSelectorText != nullptr && *(uintptr_t*)_fullscreenModeSelectorText != NULL) {
-        try { _fullscreenModeSelectorText->setCString(FullscreenManager::ModeToCstr(FullscreenManager::GetFullscreenMode())); }
-        catch(...) { }
-    }
-    if(_initialized && _fullscreenModeComboBox != nullptr && *(uintptr_t*)_fullscreenModeComboBox != NULL) {
+    if(_initialized && _fullscreenModeComboBox) {
         try { _fullscreenModeComboBox->SetIndex(2 - (int)FullscreenManager::GetFullscreenMode()); }
         catch(...) { }
     }
 }
 void ScreenSelectorExtension::UpdateScreenOption() {
-    if(_screenSelectorText != nullptr && *(uintptr_t*)_screenSelectorText != NULL) {
-        try { _screenSelectorText->setCString(FullscreenManager::GetMonitorString().c_str()); }
-        catch(...) { }
-    }
-    if(_initialized && _screenComboBox != nullptr && *(uintptr_t*)_screenComboBox != NULL) {
+    if(_initialized && _screenComboBox) {
         try { _screenComboBox->SetIndex(FullscreenManager::GetMonitorStrings().size() - 1 - FullscreenManager::GetScreen()); }
         catch(...) { }
     }
@@ -98,49 +90,49 @@ void ScreenSelectorExtension::InitVideoOptionsLayer(CCLayer* self) {
     resetScreenSelection();
 
     // fullscreen
-    _fullscreenModeSelectorText = CCLabelBMFont::create("Unknown", "bigFont.fnt");
-    _fullscreenModeSelectorText->setPosition({ layer->getContentSize().width * 0.5f - 84.f, vanillaFullscreenText->getPositionY() - 0.75f });
-    _fullscreenModeSelectorText->setScale(vanillaFullscreenText->getScale() * 0.85f);
-    layer->addChild(_fullscreenModeSelectorText);
+    auto fullscreenModeSelectorText = CCLabelBMFont::create(FullscreenManager::ModeToCstr(FullscreenManager::GetFullscreenMode()), "bigFont.fnt");
+    fullscreenModeSelectorText->setPosition({ layer->getContentSize().width * 0.5f - 84.f, vanillaFullscreenText->getPositionY() - 0.75f });
+    fullscreenModeSelectorText->setScale(vanillaFullscreenText->getScale() * 0.85f);
+    layer->addChild(fullscreenModeSelectorText);
 
     auto fullscreenSelectorLabel = CCLabelBMFont::create("Fullscreen", "goldFont.fnt");
-    fullscreenSelectorLabel->setPosition({ _fullscreenModeSelectorText->getPositionX(), _fullscreenModeSelectorText->getPositionY() + 17.f });
+    fullscreenSelectorLabel->setPosition({ fullscreenModeSelectorText->getPositionX(), fullscreenModeSelectorText->getPositionY() + 17.f });
     fullscreenSelectorLabel->setScale(vanillaFullscreenText->getScale());
     layer->addChild(fullscreenSelectorLabel);
 
     auto selectFullscreenLeftSprite = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
-    auto selectFullscreenLeftButton = gd::CCMenuItemSpriteExtra::create(selectFullscreenLeftSprite, _fullscreenModeSelectorText,
+    auto selectFullscreenLeftButton = gd::CCMenuItemSpriteExtra::create(selectFullscreenLeftSprite, fullscreenModeSelectorText,
         menu_selector(SelectPreviousFullscreenMode));
-    selectFullscreenLeftButton->setPosition(menu->convertToNodeSpace({ -70.f, 0.f }) + _fullscreenModeSelectorText->getPosition());
+    selectFullscreenLeftButton->setPosition(menu->convertToNodeSpace({ -70.f, 0.f }) + fullscreenModeSelectorText->getPosition());
     menu->addChild(selectFullscreenLeftButton);
 
     auto selectFullscreenRightSprite = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
-    auto selectFullscreenRightButton = gd::CCMenuItemSpriteExtra::create(selectFullscreenRightSprite, _fullscreenModeSelectorText,
+    auto selectFullscreenRightButton = gd::CCMenuItemSpriteExtra::create(selectFullscreenRightSprite, fullscreenModeSelectorText,
         menu_selector(SelectNextFullscreenMode));
-    selectFullscreenRightButton->setPosition(menu->convertToNodeSpace({ 70.f, 0.f }) + _fullscreenModeSelectorText->getPosition());
+    selectFullscreenRightButton->setPosition(menu->convertToNodeSpace({ 70.f, 0.f }) + fullscreenModeSelectorText->getPosition());
     menu->addChild(selectFullscreenRightButton);
 
     // screen
-    _screenSelectorText = CCLabelBMFont::create("9: 9999x9999", "bigFont.fnt");
-    _screenSelectorText->setPosition({ layer->getContentSize().width * 0.5f + 84.f, vanillaFullscreenText->getPositionY() - 0.75f });
-    _screenSelectorText->setScale(vanillaFullscreenText->getScale() * 0.85f);
-    layer->addChild(_screenSelectorText);
+    auto screenSelectorText = CCLabelBMFont::create(FullscreenManager::GetMonitorString().c_str(), "bigFont.fnt");
+    screenSelectorText->setPosition({ layer->getContentSize().width * 0.5f + 84.f, vanillaFullscreenText->getPositionY() - 0.75f });
+    screenSelectorText->setScale(vanillaFullscreenText->getScale() * 0.85f);
+    layer->addChild(screenSelectorText);
 
     auto screenSelectorLabel = CCLabelBMFont::create("Screen", "goldFont.fnt");
-    screenSelectorLabel->setPosition({ _screenSelectorText->getPositionX(), _screenSelectorText->getPositionY() + 17.f });
+    screenSelectorLabel->setPosition({ screenSelectorText->getPositionX(), screenSelectorText->getPositionY() + 17.f });
     screenSelectorLabel->setScale(vanillaFullscreenText->getScale());
     layer->addChild(screenSelectorLabel);
 
     auto selectScreenLeftSprite = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
-    auto selectScreenLeftButton = gd::CCMenuItemSpriteExtra::create(selectScreenLeftSprite, _screenSelectorText,
+    auto selectScreenLeftButton = gd::CCMenuItemSpriteExtra::create(selectScreenLeftSprite, screenSelectorText,
         menu_selector(SelectPreviousMonitor));
-    selectScreenLeftButton->setPosition(menu->convertToNodeSpace({ -70.f, 0.f }) + _screenSelectorText->getPosition());
+    selectScreenLeftButton->setPosition(menu->convertToNodeSpace({ -70.f, 0.f }) + screenSelectorText->getPosition());
     menu->addChild(selectScreenLeftButton);
 
     auto selectScreenRightSprite = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
-    auto selectScreenRightButton = gd::CCMenuItemSpriteExtra::create(selectScreenRightSprite, _screenSelectorText,
+    auto selectScreenRightButton = gd::CCMenuItemSpriteExtra::create(selectScreenRightSprite, screenSelectorText,
         menu_selector(SelectNextMonitor));
-    selectScreenRightButton->setPosition(menu->convertToNodeSpace({ 70.f, 0.f }) + _screenSelectorText->getPosition());
+    selectScreenRightButton->setPosition(menu->convertToNodeSpace({ 70.f, 0.f }) + screenSelectorText->getPosition());
     menu->addChild(selectScreenRightButton);
 
     UpdateFullscreenModeOption();
