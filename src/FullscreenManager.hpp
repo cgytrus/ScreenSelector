@@ -41,7 +41,6 @@ class FullscreenManager : public CCObject {
         static void SetExclusiveFullscreen(bool);
 
         static void SetScreen(int);
-        static void SetMonitor(HMONITOR);
         static int GetScreen();
         static HMONITOR GetMonitor();
         static std::string GetMonitorString();

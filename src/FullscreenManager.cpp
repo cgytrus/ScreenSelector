@@ -219,14 +219,6 @@ void FullscreenManager::SetScreen(int screen) {
     else SetFullscreenMode(GetFullscreenMode(), UpdateMode::Force); // force an update without changing the fullscreen mode
     SaveGameVariables();
 }
-void FullscreenManager::SetMonitor(HMONITOR monitor) {
-    for(size_t i = 0; i < _monitors.size(); i++) {
-        if(_monitors.at(i) != monitor) continue;
-        _screen = i;
-        SaveGameVariables();
-        break;
-    }
-}
 int FullscreenManager::GetScreen() {
     return _screen;
 }

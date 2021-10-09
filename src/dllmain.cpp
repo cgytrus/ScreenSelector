@@ -67,12 +67,6 @@ void __fastcall idk_applyGraphicsSettings_H(void* self, void*, CCObject* obj) {
     ScreenSelectorExtension::ApplySelections();
 }
 
-void (__cdecl* CCEGLView_onGLFWwindowPosCallback)(GLFWwindow* window, int x, int y);
-void __cdecl CCEGLView_onGLFWwindowPosCallback_H(GLFWwindow* window, int x, int y) {
-    CCEGLView_onGLFWwindowPosCallback(window, x, y);
-    FullscreenManager::SetMonitor(MonitorFromWindow(FullscreenManager::getWindowHwnd(window), MONITOR_DEFAULTTONEAREST));
-}
-
 bool (__thiscall* VideoOptionsLayer_init)(CCLayer* self);
 bool __fastcall VideoOptionsLayer_init_H(CCLayer* self) {
     if(!VideoOptionsLayer_init(self)) return false;
@@ -111,9 +105,6 @@ DWORD WINAPI MainThread(void* hModule) {
 
     MH_CreateHook(reinterpret_cast<void*>(base + 0x1e1e70), idk_applyGraphicsSettings_H,
         reinterpret_cast<void**>(&idk_applyGraphicsSettings));
-
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xc42b0), CCEGLView_onGLFWwindowPosCallback_H,
-        reinterpret_cast<void**>(&CCEGLView_onGLFWwindowPosCallback));
 
     MH_CreateHook(reinterpret_cast<void*>(base + 0x1e0e10), VideoOptionsLayer_init_H,
         reinterpret_cast<void**>(&VideoOptionsLayer_init));
