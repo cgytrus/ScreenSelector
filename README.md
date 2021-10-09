@@ -3,6 +3,8 @@ A mod that lets you select the screen to run Geometry Dash on
 
 Fully compatible with Mega Hack v6 **(except the "Fullscreen" and "Borderless Fullscreen" options in the "Display" tab, don't touch those!)**
 
+**If you're using MHv6, the mod has to be added to `absolutedlls` and *not* `extensions`, and if you're using any other mod loader make sure the mod is loaded before the game window is created!** (for example in quickldr you put it in `Startup`, which is default if you don't have anything specified)
+
 [Video showcase](https://youtu.be/NxBCq04MgMs)
 
 ## Features
