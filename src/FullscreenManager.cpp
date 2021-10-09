@@ -204,14 +204,19 @@ void FullscreenManager::SetExclusiveFullscreen(bool fullscreen) {
 
 void FullscreenManager::SetScreen(int screen) {
     auto view = CCDirector::sharedDirector()->getOpenGLView();
-    if(!view) return;
+    auto gm = gd::GameManager::sharedState();
+    if(!view || !gm) return;
 
     screen = min(max(screen, 0), (int)_monitors.size() - 1);
     if(_screen == screen) return;
     _screen = screen;
-
-    SetFullscreenMode(GetFullscreenMode(), UpdateMode::Force); // force an update without changing the fullscreen mode
-
+    if(GetFullscreenMode() == FullscreenMode::Exclusive) {
+        // set m_bIsFullscreen to false directly to make the view->toggleFullScreen(bool) in reloadAll
+        // think that we're in windowed and recreate the window for us
+        *(bool*)((uintptr_t)view + 0xb0) = false; // view->m_bIsFullscreen = false
+        gm->reloadAll(true, true, true);
+    }
+    else SetFullscreenMode(GetFullscreenMode(), UpdateMode::Force); // force an update without changing the fullscreen mode
     SaveGameVariables();
 }
 void FullscreenManager::SetMonitor(HMONITOR monitor) {
