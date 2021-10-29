@@ -111,6 +111,11 @@ DWORD WINAPI MainThread(void* hModule) {
 
     if(Hackpro::Initialize() && Hackpro::IsReady()) ScreenSelectorExtension::Create();
 
+    if(!currentGlobalMonitor) {
+        // too lazy to split the string properly to make the line not be wide af
+        MessageBox(0, "The mod was loaded too late!\nThis will cause issues while using the mod.\nMake sure you have Screen Selector in 'absolutedlls' if you're using MHv6 or in 'Startup' if you're using QuickLdr", "Screen Selector Warning", MB_OK | MB_ICONWARNING);
+    }
+
     return 0;
 }
 
