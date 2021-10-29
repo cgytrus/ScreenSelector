@@ -8,7 +8,8 @@ int* globalMonitorsCount;
 GLFWmonitor** currentGlobalMonitor;
 
 GLFWmonitor* getMonitor(int index) {
-    if(index < 0 || index >= *globalMonitorsCount) {
+    auto maxMonitors = globalMonitorsCount ? *globalMonitorsCount : 1;
+    if(index < 0 || index >= maxMonitors) {
         MessageBox(0, "Failed getting current screen!\nFalling back to primary monitor", "Screen Selector Error", MB_OK | MB_ICONERROR);
         return (GLFWmonitor*)globalMonitors;
     }
@@ -30,7 +31,7 @@ GLFWmonitor* __cdecl findMonitor_H(int* monitorCount) {
 void (__stdcall* resetGlobalMonitor)();
 void __stdcall resetGlobalMonitor_H() {
     // for some reason it crashes if the current monitor isn't the first one
-    *currentGlobalMonitor = getMonitor(0);
+    if(currentGlobalMonitor) *currentGlobalMonitor = getMonitor(0);
     resetGlobalMonitor();
 }
 
@@ -38,11 +39,12 @@ void (__stdcall* getGlobalMonitor)();
 void __stdcall getGlobalMonitor_H() {
     int screen = FullscreenManager::GetScreen();
     // load the variable manually because it didn't load in FullscreenManager yet
-    if(screen < 0 || screen >= *globalMonitorsCount) {
+    auto maxMonitors = globalMonitorsCount ? *globalMonitorsCount : 1;
+    if(screen < 0 || screen >= maxMonitors) {
         auto gm = gd::GameManager::sharedState();
         if(gm && gm->m_pValueKeeper) screen = gm->getIntGameVariableDefault(FullscreenManager::screenGameVar, 0);
     }
-    *currentGlobalMonitor = getMonitor(screen);
+    if(currentGlobalMonitor) *currentGlobalMonitor = getMonitor(screen);
     getGlobalMonitor();
 }
 
@@ -75,12 +77,6 @@ bool __fastcall VideoOptionsLayer_init_H(CCLayer* self) {
 }
 
 DWORD WINAPI MainThread(void* hModule) {
-    /*AllocConsole();
-    std::ofstream conout("CONOUT$", std::ios::out);
-    std::ifstream conin("CONIN$", std::ios::in);
-    std::cout.rdbuf(conout.rdbuf());
-    std::cin.rdbuf(conin.rdbuf());*/
-
     MH_Initialize();
 
     auto base = gd::base;
@@ -114,13 +110,6 @@ DWORD WINAPI MainThread(void* hModule) {
     while(!FullscreenManager::LoadGameVariables()) Sleep(0);
 
     if(Hackpro::Initialize() && Hackpro::IsReady()) ScreenSelectorExtension::Create();
-
-    /*std::getline(std::cin, std::string());
-
-    conout.close();
-    conin.close();
-    FreeConsole();
-    FreeLibraryAndExitThread(cast<HMODULE>(hModule), 0);*/
 
     return 0;
 }
