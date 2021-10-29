@@ -66,7 +66,7 @@ bool FullscreenManager::LoadGameVariables() {
     _fullscreenMode = (FullscreenMode)gm->getIntGameVariableDefault(fullscreenModeGameVar, !gm->getGameVariable(vanillaWindowedGameVar)); // default to vanilla setting
     _screen = gm->getIntGameVariableDefault(screenGameVar, 0);
 
-    SetFullscreenMode(_fullscreenMode, UpdateMode::Force);
+    SetFullscreenMode(_fullscreenMode, _fullscreenMode == FullscreenMode::Exclusive ? UpdateMode::None : UpdateMode::Force);
     SetScreen(_screen);
 
     ScreenSelectorExtension::UpdateFullscreenModeOption();
