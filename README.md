@@ -3,8 +3,6 @@ A mod that lets you select the screen to run Geometry Dash on
 
 Fully compatible with Mega Hack v6 **(except the "Fullscreen" and "Borderless Fullscreen" options in the "Display" tab, don't touch those!)**
 
-**If you're using MHv6, the mod has to be added to `absolutedlls` and *not* `extensions`, and if you're using any other mod loader make sure the mod is loaded before the game window is created!** (for example in quickldr you put it in `Startup`, which is default if you don't have anything specified)
-
 [Video showcase](https://youtu.be/NxBCq04MgMs)
 
 ## Features
@@ -14,7 +12,19 @@ Fully compatible with Mega Hack v6 **(except the "Fullscreen" and "Borderless Fu
 - Integrates with both vanilla video options and Mega Hack v6
 
 ## Installation
-Same as any of the [Mat's mods](https://matcool.github.io/mods#install-instructions)
+- (this applies to all mod loaders) put [this file](https://github.com/HJfod/minhook/releases/latest/download/minhook.x32.dll) in the same folder as GeometryDash.exe is in
+### Mega Hack v6
+- Open the `absolutedlls` file in notepad
+- Add a **new line** (by clicking on the last line and pressing `Enter`)
+- Write `ScreenSelector.dll` and save the file
+- Put the **downloaded** ScreenSelector.dll file in the same folder as GeometryDash.exe is in
+### QuickLdr
+- If there's no `settings.txt` file in the `quickldr` folder, create it
+- Add a **new line** (by clicking on the last line and pressing `Enter`)
+- Write `ScreenSelector.dll` and save the file
+- Put the **downloaded** ScreenSelector.dll file in the `quickldr` folder
+### GDDllLoader
+- Put the **downloaded** ScreenSelector.dll file in the `adaf-dll` folder
 
 ## Compiling
 - Clone the repo recursively (with `--recursive`)
