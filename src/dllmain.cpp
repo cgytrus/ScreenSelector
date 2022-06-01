@@ -5,11 +5,11 @@
 #include "extensions2.h"
 
 GLFWmonitor** globalMonitors;
-int* globalMonitorsCount;
+int globalMonitorsCount;
 GLFWmonitor** currentGlobalMonitor;
 
 GLFWmonitor* getMonitor(int index) {
-    auto maxMonitors = globalMonitorsCount ? *globalMonitorsCount : 1;
+    auto maxMonitors = globalMonitorsCount;
     if(index < 0 || index >= maxMonitors) {
         MessageBox(0, "Failed getting current screen!\nFalling back to primary monitor", "Screen Selector Error", MB_OK | MB_ICONERROR);
         return (GLFWmonitor*)globalMonitors;
@@ -17,22 +17,12 @@ GLFWmonitor* getMonitor(int index) {
     return (GLFWmonitor*)((uintptr_t)globalMonitors + index * sizeof(uintptr_t));
 }
 
-// i'm not sure which class this is in, but it doesn't matter because i finally found out how this function works!!!!
-GLFWmonitor* (__cdecl* findMonitor)(int* monitorCount);
-GLFWmonitor* __cdecl findMonitor_H(int* monitorCount) {
-    auto cocos2dBase = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
-    // the original function just returns an array of all monitors (GLFWmonitor**) cast to GLFWmonitor* to get the first element
-    uintptr_t monitor = (uintptr_t)findMonitor(monitorCount);
-    globalMonitors = (GLFWmonitor**)monitor;
-    globalMonitorsCount = monitorCount;
-    currentGlobalMonitor = (GLFWmonitor**)(cocos2dBase + 0x1a1534);
-    return getMonitor(0);
-}
+GLFWmonitor** (__cdecl* findMonitors)(int* monitorCount);
 
 void (__stdcall* resetGlobalMonitor)();
 void __stdcall resetGlobalMonitor_H() {
     // for some reason it crashes if the current monitor isn't the first one
-    if(currentGlobalMonitor) *currentGlobalMonitor = getMonitor(0);
+    *currentGlobalMonitor = getMonitor(0);
     resetGlobalMonitor();
 }
 
@@ -40,12 +30,12 @@ void (__stdcall* getGlobalMonitor)();
 void __stdcall getGlobalMonitor_H() {
     int screen = FullscreenManager::getScreen();
     // load the variable manually because it didn't load in FullscreenManager yet
-    auto maxMonitors = globalMonitorsCount ? *globalMonitorsCount : 1;
+    auto maxMonitors = globalMonitorsCount;
     if(screen < 0 || screen >= maxMonitors) {
         auto gm = gd::GameManager::sharedState();
         if(gm && gm->m_pValueKeeper) screen = gm->getIntGameVariableDefault(FullscreenManager::screenGameVar, 0);
     }
-    if(currentGlobalMonitor) *currentGlobalMonitor = getMonitor(screen);
+    *currentGlobalMonitor = getMonitor(screen);
     getGlobalMonitor();
 }
 
@@ -62,6 +52,14 @@ void __fastcall GameManager_setIntGameVariable_H(gd::GameManager* self, void*, c
     GameManager_setIntGameVariable(self, key, value);
     if(strcmp(key, FullscreenManager::fullscreenModeGameVar) == 0)
         self->setGameVariable(FullscreenManager::vanillaWindowedGameVar, (FullscreenMode)value != FullscreenMode::Exclusive);
+}
+
+void (__cdecl* CCEGLView_onGLFWwindowPosCallback)(GLFWwindow* window, int x, int y);
+void __cdecl CCEGLView_onGLFWwindowPosCallback_H(GLFWwindow* window, int x, int y) {
+    CCEGLView_onGLFWwindowPosCallback(window, x, y);
+    if(FullscreenManager::getFullscreenMode() != FullscreenMode::Windowed)
+        return;
+    FullscreenManager::setMonitor(MonitorFromWindow(FullscreenManager::getWindowHwnd(window), MONITOR_DEFAULTTONEAREST));
 }
 
 void (__thiscall* idk_applyGraphicsSettings)(void* self, CCObject* obj);
@@ -83,10 +81,11 @@ DWORD WINAPI mainThread(void* hModule) {
     auto base = gd::base;
     auto cocos2dBase = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
 
-    patch(base + 0x1e1f68, { 0xeb }, true); // don't check for changes when applying settings
+    *reinterpret_cast<void**>(&findMonitors) = reinterpret_cast<void*>(cocos2dBase + 0x114f20);
+    currentGlobalMonitor = (GLFWmonitor**)(cocos2dBase + 0x1a1534);
+    globalMonitors = findMonitors(&globalMonitorsCount);
 
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0x114f20), findMonitor_H,
-        reinterpret_cast<void**>(&findMonitor));
+    patch(base + 0x1e1f68, { 0xeb }, true); // don't check for changes when applying settings
 
     MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0x110760), resetGlobalMonitor_H,
         reinterpret_cast<void**>(&resetGlobalMonitor));
@@ -100,6 +99,9 @@ DWORD WINAPI mainThread(void* hModule) {
     MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xc48d0), CCEGLView_toggleFullScreen_H,
         reinterpret_cast<void**>(&CCEGLView_toggleFullScreen));
 
+    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xc42b0), CCEGLView_onGLFWwindowPosCallback_H,
+        reinterpret_cast<void**>(&CCEGLView_onGLFWwindowPosCallback));
+
     MH_CreateHook(reinterpret_cast<void*>(base + 0x1e1e70), idk_applyGraphicsSettings_H,
         reinterpret_cast<void**>(&idk_applyGraphicsSettings));
 
@@ -112,11 +114,6 @@ DWORD WINAPI mainThread(void* hModule) {
         Sleep(0);
 
     ScreenSelectorExtension::create();
-
-    if(!currentGlobalMonitor) {
-        // too lazy to split the string properly to make the line not be wide af
-        MessageBox(0, "The mod was loaded too late!\nThis will cause issues while using the mod.\nMake sure you have Screen Selector in 'absolutedlls' if you're using MHv6 or in 'Startup' if you're using QuickLdr", "Screen Selector Warning", MB_OK | MB_ICONWARNING);
-    }
 
     return 0;
 }

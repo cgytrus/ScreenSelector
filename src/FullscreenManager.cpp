@@ -13,13 +13,9 @@ std::vector<std::string> FullscreenManager::_monitorStrings;
 int FullscreenManager::_screen = -1;
 FullscreenMode FullscreenManager::_fullscreenMode = FullscreenMode::Windowed;
 
-// the free window resize patch from mhv6
+// the free window resize patch from mhv6, the mhv7 hack is too limiting so can't just toggle that
 bool _freeWindowResize = false;
 static void toggleFreeWindowResize(bool enabled) {
-    // don't do it if we have mhv6
-    // this should never happen anyway but just in case
-    ////if(_extension) return; // nvm
-
     // we don't wanna patch/unpatch multiple times
     if(_freeWindowResize == enabled) return;
     _freeWindowResize = enabled;
@@ -221,6 +217,14 @@ void FullscreenManager::setScreen(int screen) {
 }
 int FullscreenManager::getScreen() {
     return _screen;
+}
+void FullscreenManager::setMonitor(HMONITOR monitor) {
+    for(size_t i = 0; i < _monitors.size(); i++) {
+        if(_monitors.at(i) != monitor) continue;
+        _screen = i;
+        saveGameVariables();
+        break;
+    }
 }
 HMONITOR FullscreenManager::getMonitor() {
     return _monitors.at(_screen);
