@@ -15,7 +15,7 @@ FullscreenMode FullscreenManager::_fullscreenMode = FullscreenMode::Windowed;
 
 // the free window resize patch from mhv6
 bool _freeWindowResize = false;
-static void ToggleFreeWindowResize(bool enabled) {
+static void toggleFreeWindowResize(bool enabled) {
     // don't do it if we have mhv6
     // this should never happen anyway but just in case
     ////if(_extension) return; // nvm
@@ -41,7 +41,7 @@ static void ToggleFreeWindowResize(bool enabled) {
     }
 }
 
-bool FullscreenManager::SaveGameVariables() {
+bool FullscreenManager::saveGameVariables() {
     auto gm = gd::GameManager::sharedState();
     if(!gm) return false;
     if(!gm->m_pValueKeeper) return false;
@@ -49,38 +49,38 @@ bool FullscreenManager::SaveGameVariables() {
     gm->setIntGameVariable(screenGameVar, _screen);
     gm->setIntGameVariable(fullscreenModeGameVar, (int)_fullscreenMode);
 
-    ScreenSelectorExtension::UpdateFullscreenModeOption();
-    ScreenSelectorExtension::UpdateScreenOption();
+    ScreenSelectorExtension::updateFullscreenModeOption();
+    ScreenSelectorExtension::updateScreenOption();
 
     return true;
 }
 
-bool FullscreenManager::LoadGameVariables() {
+bool FullscreenManager::loadGameVariables() {
     auto gm = gd::GameManager::sharedState();
     if(!gm) return false;
     if(!gm->m_pValueKeeper) return false;
     if(!CCEGLView::sharedOpenGLView()) return false;
 
-    UpdateMonitors();
+    updateMonitors();
 
     _fullscreenMode = (FullscreenMode)gm->getIntGameVariableDefault(fullscreenModeGameVar, !gm->getGameVariable(vanillaWindowedGameVar)); // default to vanilla setting
     _screen = gm->getIntGameVariableDefault(screenGameVar, 0);
 
-    SetFullscreenMode(_fullscreenMode, _fullscreenMode == FullscreenMode::Exclusive ? UpdateMode::None : UpdateMode::Force);
-    SetScreen(_screen);
+    setFullscreenMode(_fullscreenMode, _fullscreenMode == FullscreenMode::Exclusive ? UpdateMode::None : UpdateMode::Force);
+    setScreen(_screen);
 
-    ScreenSelectorExtension::UpdateFullscreenModeOption();
-    ScreenSelectorExtension::UpdateScreenOption();
+    ScreenSelectorExtension::updateFullscreenModeOption();
+    ScreenSelectorExtension::updateScreenOption();
 
     return true;
 }
 
-void FullscreenManager::SetFullscreenMode(FullscreenMode mode, UpdateMode update) {
+void FullscreenManager::setFullscreenMode(FullscreenMode mode, UpdateMode update) {
     if(_fullscreenMode == mode && update != UpdateMode::Force) return;
 
     if(update == UpdateMode::None) {
         _fullscreenMode = mode;
-        SaveGameVariables();
+        saveGameVariables();
         return;
     }
 
@@ -94,38 +94,38 @@ void FullscreenManager::SetFullscreenMode(FullscreenMode mode, UpdateMode update
     // or otherwise my functions get called befoe the switch from exclusive fullscreen happens and it breaks stuff
     switch(mode) {
         case FullscreenMode::Windowed: {
-            SetExclusiveFullscreen(false);
+            setExclusiveFullscreen(false);
 
-            CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::SetWindowedPreCallback));
+            CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::setWindowedPreCallback));
             CCDelayTime* delayTime = CCDelayTime::create(0.f);
             CCSequence* sequence = CCSequence::create(delayTime, callFunc, delayTime);
             gm->getActionManager()->addAction((CCAction*)sequence, (CCNode*)gm, false);
             break;
         }
         case FullscreenMode::Borderless: {
-            SetExclusiveFullscreen(false);
+            setExclusiveFullscreen(false);
 
-            CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::SetBorderlessFullscreenPreCallback));
+            CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::setBorderlessFullscreenPreCallback));
             CCDelayTime* delayTime = CCDelayTime::create(0.f);
             CCSequence* sequence = CCSequence::create(delayTime, callFunc, delayTime);
             gm->getActionManager()->addAction((CCAction*)sequence, (CCNode*)gm, false);
             break;
         }
         case FullscreenMode::Exclusive: {
-            SetExclusiveFullscreen(true);
+            setExclusiveFullscreen(true);
             break;
         }
     }
 
     _fullscreenMode = mode;
-    SaveGameVariables();
+    saveGameVariables();
 }
-FullscreenMode FullscreenManager::GetFullscreenMode() {
+FullscreenMode FullscreenManager::getFullscreenMode() {
     return _fullscreenMode;
 }
 
 void windowedModesShared(HWND windowHwnd, CCEGLView* view, int width, int height) {
-    HMONITOR monitor = FullscreenManager::GetMonitor();
+    HMONITOR monitor = FullscreenManager::getMonitor();
     MONITORINFO monitorInfo;
     monitorInfo.cbSize = sizeof(MONITORINFO);
     if(!GetMonitorInfo(monitor, &monitorInfo)) {
@@ -141,15 +141,15 @@ void windowedModesShared(HWND windowHwnd, CCEGLView* view, int width, int height
     view->resizeWindow(width, height);
 }
 
-void FullscreenManager::SetWindowedPreCallback() {
+void FullscreenManager::setWindowedPreCallback() {
     auto gm = gd::GameManager::sharedState();
-    CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::SetWindowedCallback));
+    CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::setWindowedCallback));
     CCDelayTime* delayTime = CCDelayTime::create(0.f);
     CCSequence* sequence = CCSequence::create(delayTime, callFunc, delayTime);
     gm->getActionManager()->addAction((CCAction*)sequence, (CCNode*)gm, false);
 }
-void FullscreenManager::SetWindowedCallback() { FullscreenManager::SetWindowed(); }
-void FullscreenManager::SetWindowed() {
+void FullscreenManager::setWindowedCallback() { FullscreenManager::setWindowed(); }
+void FullscreenManager::setWindowed() {
     auto gm = gd::GameManager::sharedState();
     auto view = CCEGLView::sharedOpenGLView();
     if(!gm || !view) return;
@@ -166,19 +166,19 @@ void FullscreenManager::SetWindowed() {
     // p.s. the function address i took this from is 0x1126e0 in cocos2d
     SetWindowLong(windowHwnd, GWL_STYLE, 0x6cf0000);
 
-    ToggleFreeWindowResize(false);
+    toggleFreeWindowResize(false);
     CCSize clientSize = getWindowedSize(view);
     windowedModesShared(windowHwnd, view, (int)clientSize.width, (int)clientSize.height);
 }
-void FullscreenManager::SetBorderlessFullscreenPreCallback() {
+void FullscreenManager::setBorderlessFullscreenPreCallback() {
     auto gm = gd::GameManager::sharedState();
-    CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::SetBorderlessFullscreenCallback));
+    CCCallFunc* callFunc = CCCallFunc::create(nullptr, callfunc_selector(FullscreenManager::setBorderlessFullscreenCallback));
     CCDelayTime* delayTime = CCDelayTime::create(0.f);
     CCSequence* sequence = CCSequence::create(delayTime, callFunc, delayTime);
     gm->getActionManager()->addAction((CCAction*)sequence, (CCNode*)gm, false);
 }
-void FullscreenManager::SetBorderlessFullscreenCallback() { FullscreenManager::SetBorderlessFullscreen(); }
-void FullscreenManager::SetBorderlessFullscreen() {
+void FullscreenManager::setBorderlessFullscreenCallback() { FullscreenManager::setBorderlessFullscreen(); }
+void FullscreenManager::setBorderlessFullscreen() {
     auto gm = gd::GameManager::sharedState();
     auto view = CCEGLView::sharedOpenGLView();
     if(!gm || !view) return;
@@ -190,10 +190,10 @@ void FullscreenManager::SetBorderlessFullscreen() {
     LONG windowStyle = GetWindowLong(windowHwnd, GWL_STYLE);
     SetWindowLong(windowHwnd, GWL_STYLE, windowStyle & ~(WS_CAPTION | WS_SIZEBOX | WS_SYSMENU));
 
-    ToggleFreeWindowResize(true);
+    toggleFreeWindowResize(true);
     windowedModesShared(windowHwnd, view, 0, 0);
 }
-void FullscreenManager::SetExclusiveFullscreen(bool fullscreen) {
+void FullscreenManager::setExclusiveFullscreen(bool fullscreen) {
     auto gm = gd::GameManager::sharedState();
     if(!gm) return;
     bool currentWindowed = gm->getGameVariable(vanillaWindowedGameVar);
@@ -202,7 +202,7 @@ void FullscreenManager::SetExclusiveFullscreen(bool fullscreen) {
     gm->reloadAll(true, fullscreen, true);
 }
 
-void FullscreenManager::SetScreen(int screen) {
+void FullscreenManager::setScreen(int screen) {
     auto view = CCDirector::sharedDirector()->getOpenGLView();
     auto gm = gd::GameManager::sharedState();
     if(!view || !gm) return;
@@ -210,34 +210,34 @@ void FullscreenManager::SetScreen(int screen) {
     screen = min(max(screen, 0), (int)_monitors.size() - 1);
     if(_screen == screen) return;
     _screen = screen;
-    if(GetFullscreenMode() == FullscreenMode::Exclusive) {
+    if(getFullscreenMode() == FullscreenMode::Exclusive) {
         // set m_bIsFullscreen to false directly to make the view->toggleFullScreen(bool) in reloadAll
         // think that we're in windowed and recreate the window for us
         *(bool*)((uintptr_t)view + 0xb0) = false; // view->m_bIsFullscreen = false
         gm->reloadAll(true, true, true);
     }
-    else SetFullscreenMode(GetFullscreenMode(), UpdateMode::Force); // force an update without changing the fullscreen mode
-    SaveGameVariables();
+    else setFullscreenMode(getFullscreenMode(), UpdateMode::Force); // force an update without changing the fullscreen mode
+    saveGameVariables();
 }
-int FullscreenManager::GetScreen() {
+int FullscreenManager::getScreen() {
     return _screen;
 }
-HMONITOR FullscreenManager::GetMonitor() {
+HMONITOR FullscreenManager::getMonitor() {
     return _monitors.at(_screen);
 }
-std::string FullscreenManager::GetMonitorString() {
+std::string FullscreenManager::getMonitorString() {
     return _monitorStrings.at(_screen);
 }
-const std::vector<HMONITOR>& FullscreenManager::GetMonitors() {
+const std::vector<HMONITOR>& FullscreenManager::getMonitors() {
     return _monitors;
 }
-const std::vector<std::string>& FullscreenManager::GetMonitorStrings() {
+const std::vector<std::string>& FullscreenManager::getMonitorStrings() {
     return _monitorStrings;
 }
-void FullscreenManager::UpdateMonitors() {
-    EnumDisplayMonitors(NULL, NULL, MonitorEnumCallback, NULL);
+void FullscreenManager::updateMonitors() {
+    EnumDisplayMonitors(NULL, NULL, monitorEnumCallback, NULL);
 }
-BOOL CALLBACK FullscreenManager::MonitorEnumCallback(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+BOOL CALLBACK FullscreenManager::monitorEnumCallback(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
     _monitors.push_back(hMonitor);
     auto text = std::to_string(_monitorStrings.size()) + ": " +
         std::to_string(lprcMonitor->right - lprcMonitor->left) + "x" + std::to_string(lprcMonitor->bottom - lprcMonitor->top);
@@ -245,7 +245,7 @@ BOOL CALLBACK FullscreenManager::MonitorEnumCallback(HMONITOR hMonitor, HDC hdcM
     return TRUE;
 }
 
-const char* FullscreenManager::ModeToCstr(FullscreenMode mode) {
+const char* FullscreenManager::modeToCstr(FullscreenMode mode) {
     switch(mode) {
         case FullscreenMode::Windowed:
             return "Windowed";

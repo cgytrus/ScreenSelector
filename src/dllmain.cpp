@@ -37,7 +37,7 @@ void __stdcall resetGlobalMonitor_H() {
 
 void (__stdcall* getGlobalMonitor)();
 void __stdcall getGlobalMonitor_H() {
-    int screen = FullscreenManager::GetScreen();
+    int screen = FullscreenManager::getScreen();
     // load the variable manually because it didn't load in FullscreenManager yet
     auto maxMonitors = globalMonitorsCount ? *globalMonitorsCount : 1;
     if(screen < 0 || screen >= maxMonitors) {
@@ -52,8 +52,8 @@ void (__thiscall* CCEGLView_toggleFullScreen)(CCEGLView* self, bool fullscreen);
 void __fastcall CCEGLView_toggleFullScreen_H(CCEGLView* self, void*, bool fullscreen) {
     CCEGLView_toggleFullScreen(self, fullscreen);
     if(!fullscreen) return;
-    FullscreenManager::SetFullscreenMode(FullscreenMode::Exclusive, UpdateMode::None);
-    FullscreenManager::SaveGameVariables();
+    FullscreenManager::setFullscreenMode(FullscreenMode::Exclusive, UpdateMode::None);
+    FullscreenManager::saveGameVariables();
 }
 
 void (__thiscall* GameManager_setIntGameVariable)(gd::GameManager* self, const char* key, int value);
@@ -66,17 +66,17 @@ void __fastcall GameManager_setIntGameVariable_H(gd::GameManager* self, void*, c
 void (__thiscall* idk_applyGraphicsSettings)(void* self, CCObject* obj);
 void __fastcall idk_applyGraphicsSettings_H(void* self, void*, CCObject* obj) {
     idk_applyGraphicsSettings(self, obj);
-    ScreenSelectorExtension::ApplySelections();
+    ScreenSelectorExtension::applySelections();
 }
 
 bool (__thiscall* VideoOptionsLayer_init)(CCLayer* self);
 bool __fastcall VideoOptionsLayer_init_H(CCLayer* self) {
     if(!VideoOptionsLayer_init(self)) return false;
-    ScreenSelectorExtension::InitVideoOptionsLayer(self);
+    ScreenSelectorExtension::initVideoOptionsLayer(self);
     return true;
 }
 
-DWORD WINAPI MainThread(void* hModule) {
+DWORD WINAPI mainThread(void* hModule) {
     MH_Initialize();
 
     auto base = gd::base;
@@ -107,9 +107,9 @@ DWORD WINAPI MainThread(void* hModule) {
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-    while(!FullscreenManager::LoadGameVariables()) Sleep(0);
+    while(!FullscreenManager::loadGameVariables()) Sleep(0);
 
-    if(Hackpro::Initialize() && Hackpro::IsReady()) ScreenSelectorExtension::Create();
+    if(Hackpro::Initialize() && Hackpro::IsReady()) ScreenSelectorExtension::create();
 
     if(!currentGlobalMonitor) {
         // too lazy to split the string properly to make the line not be wide af
@@ -121,7 +121,7 @@ DWORD WINAPI MainThread(void* hModule) {
 
 BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
     if(reason == DLL_PROCESS_ATTACH) {
-        CreateThread(0, 0x100, MainThread, handle, 0, 0);
+        CreateThread(0, 0x100, mainThread, handle, 0, 0);
     }
     return TRUE;
 }

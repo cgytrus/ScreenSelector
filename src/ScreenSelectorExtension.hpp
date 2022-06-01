@@ -5,31 +5,31 @@
 
 class ScreenSelectorExtension : public Hackpro::Extension {
     private:
-        void Initialize();
+        void initialize();
 
         static Hackpro::ComboBox* _fullscreenModeComboBox;
         static Hackpro::ComboBox* _screenComboBox;
 
     protected:
-        void __stdcall ComboBoxFullscreenModeChanged(int, const char*);
+        void __stdcall comboBoxFullscreenModeChanged(int, const char*);
 
-        void __stdcall ComboBoxCurrentScreenChanged(int, const char*);
+        void __stdcall comboBoxCurrentScreenChanged(int, const char*);
 
     public:
-        static ScreenSelectorExtension* Create();
+        static ScreenSelectorExtension* create();
 
-        static void UpdateFullscreenModeOption();
-        static void UpdateScreenOption();
+        static void updateFullscreenModeOption();
+        static void updateScreenOption();
 
-        static void InitVideoOptionsLayer(CCLayer*);
+        static void initVideoOptionsLayer(CCLayer*);
 
-        void SelectNextFullscreenMode(CCObject*);
-        void SelectPreviousFullscreenMode(CCObject*);
+        void selectNextFullscreenMode(CCObject*);
+        void selectPreviousFullscreenMode(CCObject*);
 
-        void SelectNextMonitor(CCObject*);
-        void SelectPreviousMonitor(CCObject*);
+        void selectNextMonitor(CCObject*);
+        void selectPreviousMonitor(CCObject*);
 
-        static void ApplySelections();
+        static void applySelections();
 };
 
 #endif

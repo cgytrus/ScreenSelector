@@ -13,16 +13,16 @@ int _screenSelectorIndex = 0;
 int _fullscreenModeSelectorTextIndex;
 int _screenSelectorTextIndex;
 
-ScreenSelectorExtension* ScreenSelectorExtension::Create() {
+ScreenSelectorExtension* ScreenSelectorExtension::create() {
     auto pRet = static_cast<ScreenSelectorExtension*>(Extension::Create("Screen Selector"));
-    pRet->Initialize();
+    pRet->initialize();
     return pRet;
 }
 
-void ScreenSelectorExtension::Initialize() {
-    _screenComboBox = AddComboBox(combobox_callback_func(ScreenSelectorExtension::ComboBoxCurrentScreenChanged));
+void ScreenSelectorExtension::initialize() {
+    _screenComboBox = AddComboBox(combobox_callback_func(ScreenSelectorExtension::comboBoxCurrentScreenChanged));
 
-    auto monitorStrings = FullscreenManager::GetMonitorStrings();
+    auto monitorStrings = FullscreenManager::getMonitorStrings();
     std::vector<const char*> monitorCstrings;
     monitorCstrings.reserve(monitorStrings.size());
     for(int i = monitorStrings.size() - 1; i >= 0; i--)
@@ -31,51 +31,51 @@ void ScreenSelectorExtension::Initialize() {
 
     _screenComboBox->SetStrings(&monitorCstrings[0]);
 
-    _fullscreenModeComboBox = AddComboBox(combobox_callback_func(ScreenSelectorExtension::ComboBoxFullscreenModeChanged));
+    _fullscreenModeComboBox = AddComboBox(combobox_callback_func(ScreenSelectorExtension::comboBoxFullscreenModeChanged));
 
     const char* fullscreenModes[] = { "Borderless Windowed", "Exclusive Fullscreen", "Windowed", 0 };
     _fullscreenModeComboBox->SetStrings(fullscreenModes);
 
     _initialized = true;
-    UpdateScreenOption();
-    UpdateFullscreenModeOption();
+    updateScreenOption();
+    updateFullscreenModeOption();
 
     Commit();
 }
 
 void resetFullscreenModeSelection() {
-    _fullscreenModeSelectorIndex = (int)FullscreenManager::GetFullscreenMode();
-    _screenSelectorIndex = FullscreenManager::GetScreen();
+    _fullscreenModeSelectorIndex = (int)FullscreenManager::getFullscreenMode();
+    _screenSelectorIndex = FullscreenManager::getScreen();
 }
 void resetScreenSelection() {
-    _fullscreenModeSelectorIndex = (int)FullscreenManager::GetFullscreenMode();
-    _screenSelectorIndex = FullscreenManager::GetScreen();
+    _fullscreenModeSelectorIndex = (int)FullscreenManager::getFullscreenMode();
+    _screenSelectorIndex = FullscreenManager::getScreen();
 }
 
-void __stdcall ScreenSelectorExtension::ComboBoxFullscreenModeChanged(int index, const char* text) {
+void __stdcall ScreenSelectorExtension::comboBoxFullscreenModeChanged(int index, const char* text) {
     if(!_initialized) return;
-    FullscreenManager::SetFullscreenMode((FullscreenMode)(2 - index));
+    FullscreenManager::setFullscreenMode((FullscreenMode)(2 - index));
 }
 
-void __stdcall ScreenSelectorExtension::ComboBoxCurrentScreenChanged(int index, const char* text) {
+void __stdcall ScreenSelectorExtension::comboBoxCurrentScreenChanged(int index, const char* text) {
     if(!_initialized) return;
-    FullscreenManager::SetScreen(FullscreenManager::GetMonitors().size() - index - 1);
+    FullscreenManager::setScreen(FullscreenManager::getMonitors().size() - index - 1);
 }
 
-void ScreenSelectorExtension::UpdateFullscreenModeOption() {
+void ScreenSelectorExtension::updateFullscreenModeOption() {
     if(_initialized && _fullscreenModeComboBox) {
-        try { _fullscreenModeComboBox->SetIndex(2 - (int)FullscreenManager::GetFullscreenMode()); }
+        try { _fullscreenModeComboBox->SetIndex(2 - (int)FullscreenManager::getFullscreenMode()); }
         catch(...) { }
     }
 }
-void ScreenSelectorExtension::UpdateScreenOption() {
+void ScreenSelectorExtension::updateScreenOption() {
     if(_initialized && _screenComboBox) {
-        try { _screenComboBox->SetIndex(FullscreenManager::GetMonitorStrings().size() - 1 - FullscreenManager::GetScreen()); }
+        try { _screenComboBox->SetIndex(FullscreenManager::getMonitorStrings().size() - 1 - FullscreenManager::getScreen()); }
         catch(...) { }
     }
 }
 
-void ScreenSelectorExtension::InitVideoOptionsLayer(CCLayer* self) {
+void ScreenSelectorExtension::initVideoOptionsLayer(CCLayer* self) {
     auto layer = (CCNode*)self->getChildren()->objectAtIndex(0);
     auto children = layer->getChildren();
     auto vanillaFullscreenText = (CCNode*)children->objectAtIndex(3);
@@ -90,7 +90,7 @@ void ScreenSelectorExtension::InitVideoOptionsLayer(CCLayer* self) {
     resetScreenSelection();
 
     // fullscreen
-    auto fullscreenModeSelectorText = CCLabelBMFont::create(FullscreenManager::ModeToCstr(FullscreenManager::GetFullscreenMode()), "bigFont.fnt");
+    auto fullscreenModeSelectorText = CCLabelBMFont::create(FullscreenManager::modeToCstr(FullscreenManager::getFullscreenMode()), "bigFont.fnt");
     fullscreenModeSelectorText->setPosition({ layer->getContentSize().width * 0.5f - 84.f, vanillaFullscreenText->getPositionY() - 0.75f });
     fullscreenModeSelectorText->setScale(vanillaFullscreenText->getScale() * 0.85f);
     layer->addChild(fullscreenModeSelectorText);
@@ -102,18 +102,18 @@ void ScreenSelectorExtension::InitVideoOptionsLayer(CCLayer* self) {
 
     auto selectFullscreenLeftSprite = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     auto selectFullscreenLeftButton = gd::CCMenuItemSpriteExtra::create(selectFullscreenLeftSprite, fullscreenModeSelectorText,
-        menu_selector(SelectPreviousFullscreenMode));
+        menu_selector(selectPreviousFullscreenMode));
     selectFullscreenLeftButton->setPosition(menu->convertToNodeSpace({ -70.f, 0.f }) + fullscreenModeSelectorText->getPosition());
     menu->addChild(selectFullscreenLeftButton);
 
     auto selectFullscreenRightSprite = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
     auto selectFullscreenRightButton = gd::CCMenuItemSpriteExtra::create(selectFullscreenRightSprite, fullscreenModeSelectorText,
-        menu_selector(SelectNextFullscreenMode));
+        menu_selector(selectNextFullscreenMode));
     selectFullscreenRightButton->setPosition(menu->convertToNodeSpace({ 70.f, 0.f }) + fullscreenModeSelectorText->getPosition());
     menu->addChild(selectFullscreenRightButton);
 
     // screen
-    auto screenSelectorText = CCLabelBMFont::create(FullscreenManager::GetMonitorString().c_str(), "bigFont.fnt");
+    auto screenSelectorText = CCLabelBMFont::create(FullscreenManager::getMonitorString().c_str(), "bigFont.fnt");
     screenSelectorText->setPosition({ layer->getContentSize().width * 0.5f + 84.f, vanillaFullscreenText->getPositionY() - 0.75f });
     screenSelectorText->setScale(vanillaFullscreenText->getScale() * 0.85f);
     layer->addChild(screenSelectorText);
@@ -125,51 +125,51 @@ void ScreenSelectorExtension::InitVideoOptionsLayer(CCLayer* self) {
 
     auto selectScreenLeftSprite = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     auto selectScreenLeftButton = gd::CCMenuItemSpriteExtra::create(selectScreenLeftSprite, screenSelectorText,
-        menu_selector(SelectPreviousMonitor));
+        menu_selector(selectPreviousMonitor));
     selectScreenLeftButton->setPosition(menu->convertToNodeSpace({ -70.f, 0.f }) + screenSelectorText->getPosition());
     menu->addChild(selectScreenLeftButton);
 
     auto selectScreenRightSprite = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
     auto selectScreenRightButton = gd::CCMenuItemSpriteExtra::create(selectScreenRightSprite, screenSelectorText,
-        menu_selector(SelectNextMonitor));
+        menu_selector(selectNextMonitor));
     selectScreenRightButton->setPosition(menu->convertToNodeSpace({ 70.f, 0.f }) + screenSelectorText->getPosition());
     menu->addChild(selectScreenRightButton);
 
-    UpdateFullscreenModeOption();
-    UpdateScreenOption();
+    updateFullscreenModeOption();
+    updateScreenOption();
 }
 
-void ScreenSelectorExtension::SelectNextFullscreenMode(CCObject* object) {
+void ScreenSelectorExtension::selectNextFullscreenMode(CCObject* object) {
     _fullscreenModeSelectorIndex++;
     while(_fullscreenModeSelectorIndex >= 3) _fullscreenModeSelectorIndex -= 3;
     while(_fullscreenModeSelectorIndex < 0) _fullscreenModeSelectorIndex += 3;
-    ((CCLabelBMFont*)this)->setCString(FullscreenManager::ModeToCstr((FullscreenMode)_fullscreenModeSelectorIndex));
+    ((CCLabelBMFont*)this)->setCString(FullscreenManager::modeToCstr((FullscreenMode)_fullscreenModeSelectorIndex));
 }
-void ScreenSelectorExtension::SelectPreviousFullscreenMode(CCObject* object) {
+void ScreenSelectorExtension::selectPreviousFullscreenMode(CCObject* object) {
     _fullscreenModeSelectorIndex--;
     while(_fullscreenModeSelectorIndex >= 3) _fullscreenModeSelectorIndex -= 3;
     while(_fullscreenModeSelectorIndex < 0) _fullscreenModeSelectorIndex += 3;
-    ((CCLabelBMFont*)this)->setCString(FullscreenManager::ModeToCstr((FullscreenMode)_fullscreenModeSelectorIndex));
+    ((CCLabelBMFont*)this)->setCString(FullscreenManager::modeToCstr((FullscreenMode)_fullscreenModeSelectorIndex));
 }
 
-void ScreenSelectorExtension::SelectNextMonitor(CCObject* object) {
+void ScreenSelectorExtension::selectNextMonitor(CCObject* object) {
     _screenSelectorIndex++;
-    int size = (int)FullscreenManager::GetMonitors().size();
+    int size = (int)FullscreenManager::getMonitors().size();
     while(_screenSelectorIndex >= size) _screenSelectorIndex -= size;
     while(_screenSelectorIndex < 0) _screenSelectorIndex += size;
-    ((CCLabelBMFont*)this)->setCString(FullscreenManager::GetMonitorStrings().at(_screenSelectorIndex).c_str());
+    ((CCLabelBMFont*)this)->setCString(FullscreenManager::getMonitorStrings().at(_screenSelectorIndex).c_str());
 }
-void ScreenSelectorExtension::SelectPreviousMonitor(CCObject* object) {
+void ScreenSelectorExtension::selectPreviousMonitor(CCObject* object) {
     _screenSelectorIndex--;
-    int size = (int)FullscreenManager::GetMonitors().size();
+    int size = (int)FullscreenManager::getMonitors().size();
     while(_screenSelectorIndex >= size) _screenSelectorIndex -= size;
     while(_screenSelectorIndex < 0) _screenSelectorIndex += size;
-    ((CCLabelBMFont*)this)->setCString(FullscreenManager::GetMonitorStrings().at(_screenSelectorIndex).c_str());
+    ((CCLabelBMFont*)this)->setCString(FullscreenManager::getMonitorStrings().at(_screenSelectorIndex).c_str());
 }
 
-void ScreenSelectorExtension::ApplySelections() {
-    FullscreenManager::SetFullscreenMode((FullscreenMode)_fullscreenModeSelectorIndex);
-    FullscreenManager::SetScreen(_screenSelectorIndex);
+void ScreenSelectorExtension::applySelections() {
+    FullscreenManager::setFullscreenMode((FullscreenMode)_fullscreenModeSelectorIndex);
+    FullscreenManager::setScreen(_screenSelectorIndex);
 
     resetFullscreenModeSelection();
     resetScreenSelection();

@@ -18,41 +18,41 @@ class FullscreenManager : public CCObject {
         static std::vector<HMONITOR> _monitors;
         static std::vector<std::string> _monitorStrings;
 
-        static BOOL CALLBACK MonitorEnumCallback(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
+        static BOOL CALLBACK monitorEnumCallback(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 
-        void SetWindowedPreCallback();
-        void SetWindowedCallback();
-        void SetBorderlessFullscreenPreCallback();
-        void SetBorderlessFullscreenCallback();
+        void setWindowedPreCallback();
+        void setWindowedCallback();
+        void setBorderlessFullscreenPreCallback();
+        void setBorderlessFullscreenCallback();
 
     public:
         static const char* vanillaWindowedGameVar;
         static const char* fullscreenModeGameVar;
         static const char* screenGameVar;
 
-        static bool SaveGameVariables();
-        static bool LoadGameVariables();
+        static bool saveGameVariables();
+        static bool loadGameVariables();
 
-        static void SetFullscreenMode(FullscreenMode, UpdateMode = UpdateMode::OnChange);
-        static FullscreenMode GetFullscreenMode();
+        static void setFullscreenMode(FullscreenMode, UpdateMode = UpdateMode::OnChange);
+        static FullscreenMode getFullscreenMode();
 
-        static void SetWindowed();
-        static void SetBorderlessFullscreen();
-        static void SetExclusiveFullscreen(bool);
+        static void setWindowed();
+        static void setBorderlessFullscreen();
+        static void setExclusiveFullscreen(bool);
 
-        static void SetScreen(int);
-        static int GetScreen();
-        static HMONITOR GetMonitor();
-        static std::string GetMonitorString();
-        static const std::vector<HMONITOR>& GetMonitors();
-        static const std::vector<std::string>& GetMonitorStrings();
-        static void UpdateMonitors();
+        static void setScreen(int);
+        static int getScreen();
+        static HMONITOR getMonitor();
+        static std::string getMonitorString();
+        static const std::vector<HMONITOR>& getMonitors();
+        static const std::vector<std::string>& getMonitorStrings();
+        static void updateMonitors();
 
         static inline HWND getWindowHwnd(GLFWwindow* window) { return *(HWND*)((uintptr_t)window + 0x22c); }
         static inline HWND getWindowHwnd(CCEGLView* view) { return getWindowHwnd(view->getWindow()); }
         static inline CCSize getWindowedSize(CCEGLView* view) { return *(CCSize*)((uintptr_t)view + 0xa0); }
 
-        static const char* ModeToCstr(FullscreenMode);
+        static const char* modeToCstr(FullscreenMode);
 };
 
 #endif
