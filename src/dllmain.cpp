@@ -2,6 +2,7 @@
 #include "ScreenSelectorExtension.hpp"
 #include "FullscreenManager.hpp"
 #include "patcher.h"
+#include "extensions2.h"
 
 GLFWmonitor** globalMonitors;
 int* globalMonitorsCount;
@@ -107,9 +108,10 @@ DWORD WINAPI mainThread(void* hModule) {
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-    while(!FullscreenManager::loadGameVariables()) Sleep(0);
+    while(!FullscreenManager::loadGameVariables())
+        Sleep(0);
 
-    if(Hackpro::Initialize() && Hackpro::IsReady()) ScreenSelectorExtension::create();
+    ScreenSelectorExtension::create();
 
     if(!currentGlobalMonitor) {
         // too lazy to split the string properly to make the line not be wide af

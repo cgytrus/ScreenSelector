@@ -15,6 +15,7 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+  libraries/hackpro
   libraries/minhook/include
   libraries/gd.h/include
   libraries/gd.h
@@ -31,8 +32,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 add_subdirectory(libraries/minhook)
 target_link_libraries(${PROJECT_NAME} minhook)
 
+target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/libraries/hackpro/hackpro.lib)
+target_link_options(${PROJECT_NAME} PRIVATE "/DELAYLOAD:hackpro.dll")
+
 target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/libcocos2d.lib)
-# not needed most of the time
 target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/extensions/libExtensions.lib)
 target_link_libraries(${PROJECT_NAME} opengl32 ${CMAKE_SOURCE_DIR}/libraries/glew32.lib)
 target_link_libraries(${PROJECT_NAME} opengl32 ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/robtop/glfw/glfw3.lib)

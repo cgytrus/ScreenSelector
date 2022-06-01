@@ -14,7 +14,6 @@
 #include <MinHook.h>
 #include <gd.h>
 #include "utils.hpp"
-#include "hackpro_ext.hpp"
 
 using std::uintptr_t;
 

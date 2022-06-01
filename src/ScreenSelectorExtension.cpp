@@ -2,8 +2,8 @@
 #include "FullscreenManager.hpp"
 #include "ScreenSelectorExtension.hpp"
 
-Hackpro::ComboBox* ScreenSelectorExtension::_fullscreenModeComboBox;
-Hackpro::ComboBox* ScreenSelectorExtension::_screenComboBox;
+MegaHackExt::ComboBox* ScreenSelectorExtension::_fullscreenModeComboBox;
+MegaHackExt::ComboBox* ScreenSelectorExtension::_screenComboBox;
 
 bool _initialized = false;
 
@@ -13,14 +13,19 @@ int _screenSelectorIndex = 0;
 int _fullscreenModeSelectorTextIndex;
 int _screenSelectorTextIndex;
 
-ScreenSelectorExtension* ScreenSelectorExtension::create() {
-    auto pRet = static_cast<ScreenSelectorExtension*>(Extension::Create("Screen Selector"));
-    pRet->initialize();
-    return pRet;
-}
+bool ScreenSelectorExtension::mhLoaded() { return GetModuleHandle(TEXT("hackpro.dll")); }
 
-void ScreenSelectorExtension::initialize() {
-    _screenComboBox = AddComboBox(combobox_callback_func(ScreenSelectorExtension::comboBoxCurrentScreenChanged));
+void MH_CALL comboBoxFullscreenModeChanged(MegaHackExt::ComboBox*, int, const char*);
+void MH_CALL comboBoxCurrentScreenChanged(MegaHackExt::ComboBox*, int, const char*);
+
+void ScreenSelectorExtension::create() {
+    if(!mhLoaded())
+        return;
+
+    auto ext = MegaHackExt::Window::Create("Screen Selector");
+
+    _screenComboBox = MegaHackExt::ComboBox::Create("", "");
+    _screenComboBox->setCallback(comboBoxCurrentScreenChanged);
 
     auto monitorStrings = FullscreenManager::getMonitorStrings();
     std::vector<const char*> monitorCstrings;
@@ -29,48 +34,55 @@ void ScreenSelectorExtension::initialize() {
         monitorCstrings.push_back(monitorStrings[i].c_str());
     monitorCstrings.push_back(0);
 
-    _screenComboBox->SetStrings(&monitorCstrings[0]);
+    _screenComboBox->setValues(&monitorCstrings[0], false);
 
-    _fullscreenModeComboBox = AddComboBox(combobox_callback_func(ScreenSelectorExtension::comboBoxFullscreenModeChanged));
+    ext->add(_screenComboBox);
+
+    _fullscreenModeComboBox = MegaHackExt::ComboBox::Create("", "");
+    _fullscreenModeComboBox->setCallback(comboBoxFullscreenModeChanged);
 
     const char* fullscreenModes[] = { "Borderless Windowed", "Exclusive Fullscreen", "Windowed", 0 };
-    _fullscreenModeComboBox->SetStrings(fullscreenModes);
+    _fullscreenModeComboBox->setValues(fullscreenModes, false);
+
+    ext->add(_fullscreenModeComboBox);
 
     _initialized = true;
     updateScreenOption();
     updateFullscreenModeOption();
 
-    Commit();
+    MegaHackExt::Client::commit(ext);
 }
 
 void resetFullscreenModeSelection() {
     _fullscreenModeSelectorIndex = (int)FullscreenManager::getFullscreenMode();
-    _screenSelectorIndex = FullscreenManager::getScreen();
 }
 void resetScreenSelection() {
-    _fullscreenModeSelectorIndex = (int)FullscreenManager::getFullscreenMode();
     _screenSelectorIndex = FullscreenManager::getScreen();
 }
 
-void __stdcall ScreenSelectorExtension::comboBoxFullscreenModeChanged(int index, const char* text) {
-    if(!_initialized) return;
+void MH_CALL comboBoxFullscreenModeChanged(MegaHackExt::ComboBox* self, int index, const char* text) {
+    if(!_initialized)
+        return;
     FullscreenManager::setFullscreenMode((FullscreenMode)(2 - index));
 }
-
-void __stdcall ScreenSelectorExtension::comboBoxCurrentScreenChanged(int index, const char* text) {
-    if(!_initialized) return;
+void MH_CALL comboBoxCurrentScreenChanged(MegaHackExt::ComboBox* self, int index, const char* text) {
+    if(!_initialized)
+        return;
     FullscreenManager::setScreen(FullscreenManager::getMonitors().size() - index - 1);
 }
 
 void ScreenSelectorExtension::updateFullscreenModeOption() {
+    if(!_initialized)
+        return;
+
     if(_initialized && _fullscreenModeComboBox) {
-        try { _fullscreenModeComboBox->SetIndex(2 - (int)FullscreenManager::getFullscreenMode()); }
+        try { _fullscreenModeComboBox->set(2 - (int)FullscreenManager::getFullscreenMode(), false); }
         catch(...) { }
     }
 }
 void ScreenSelectorExtension::updateScreenOption() {
     if(_initialized && _screenComboBox) {
-        try { _screenComboBox->SetIndex(FullscreenManager::getMonitorStrings().size() - 1 - FullscreenManager::getScreen()); }
+        try { _screenComboBox->set(FullscreenManager::getMonitorStrings().size() - 1 - FullscreenManager::getScreen(), false); }
         catch(...) { }
     }
 }

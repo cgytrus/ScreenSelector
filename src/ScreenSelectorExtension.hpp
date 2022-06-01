@@ -1,22 +1,16 @@
-#ifndef __SCREEN_SELECTOR_EXTENSION_HPP
-#define __SCREEN_SELECTOR_EXTENSION_HPP
+#pragma once
 
-#include "hackpro_ext.hpp"
+#include "extensions2.h"
 
-class ScreenSelectorExtension : public Hackpro::Extension {
+class ScreenSelectorExtension {
     private:
-        void initialize();
-
-        static Hackpro::ComboBox* _fullscreenModeComboBox;
-        static Hackpro::ComboBox* _screenComboBox;
-
-    protected:
-        void __stdcall comboBoxFullscreenModeChanged(int, const char*);
-
-        void __stdcall comboBoxCurrentScreenChanged(int, const char*);
+        static MegaHackExt::ComboBox* _fullscreenModeComboBox;
+        static MegaHackExt::ComboBox* _screenComboBox;
 
     public:
-        static ScreenSelectorExtension* create();
+        static bool mhLoaded();
+
+        static void create();
 
         static void updateFullscreenModeOption();
         static void updateScreenOption();
@@ -31,5 +25,3 @@ class ScreenSelectorExtension : public Hackpro::Extension {
 
         static void applySelections();
 };
-
-#endif

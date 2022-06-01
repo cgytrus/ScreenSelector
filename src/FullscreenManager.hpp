@@ -1,5 +1,4 @@
-#ifndef __FULLSCREEN_MANAGER_HPP
-#define __FULLSCREEN_MANAGER_HPP
+#pragma once
 
 #include <windows.h>
 #include <memory>
@@ -54,5 +53,3 @@ class FullscreenManager : public CCObject {
 
         static const char* modeToCstr(FullscreenMode);
 };
-
-#endif
