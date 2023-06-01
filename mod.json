@@ -1,0 +1,22 @@
+{
+    "geode": "1.0.0-beta.18",
+    "version": "v1.0.0",
+    "id": "config.screenselector",
+    "name": "Screen Selector",
+    "developer": "ConfiG",
+    "description": "Select screen and borderless windowed mode",
+    "settings": {
+        "borderless": {
+            "name": "Borderless",
+            "description": "",
+            "type": "bool",
+            "default": false
+        },
+        "screen": {
+            "name": "Screen",
+            "description": "Screen index",
+            "type": "int",
+            "default": 0
+        }
+    }
+}
