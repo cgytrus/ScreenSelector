@@ -69,7 +69,7 @@ jobs:
         path: "${{ matrix.config.out_paths }}"
 
   package:
-    name: "Package both builds"
+    name: "Package builds"
     # would use linux but theres no cli build for it
     runs-on: windows-2019
     needs: ['build']
@@ -91,7 +91,7 @@ jobs:
       - name: Merge
         shell: bash
         run: |
-          mv $MOD_NAME.dll $MOD_ID.dll
+          mv "$MOD_NAME.dll" $MOD_ID.dll
           ./geode.exe package new . --binary $MOD_ID.dll --output $MOD_ID.geode
 
       - uses: actions/upload-artifact@v3
