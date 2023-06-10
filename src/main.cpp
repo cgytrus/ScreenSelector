@@ -41,7 +41,42 @@ struct CustomCCEGLView : geode::Modify<CustomCCEGLView, CCEGLView> {
         }
         CCEGLView::setupWindow(rect);
     }
+
+    void toggleFullScreen(bool fullscreen) {
+        CCEGLView::toggleFullScreen(fullscreen);
+        m_pMainWindow->width = (int)m_obWindowedSize.width;
+        m_pMainWindow->height = (int)m_obWindowedSize.height;
+        updateWindow(m_pMainWindow->width, m_pMainWindow->height);
+        centerWindow();
+    }
 };
+
+void centerWindowOrSmth(GLFWwindow* window) {
+    if(!window)
+        return;
+    RECT windowRect;
+    GetWindowRect(window->win32.handle, &windowRect);
+    int monitorCount;
+    auto monitor = _glfwGetMonitors(&monitorCount)[screen()];
+    auto vidmode = _glfwGetVideoMode(monitor);
+    int x = 0;
+    int y = 0;
+    _glfwGetMonitorPos(monitor, &x, &y);
+    x += vidmode->width / 2 - (windowRect.right - windowRect.left) / 2;
+    y += vidmode->height / 2 - (windowRect.bottom - windowRect.top) / 2;
+    SetWindowPos(window->win32.handle, HWND_TOP, x, y, 0, 0,
+        SWP_NOREDRAW | SWP_NOACTIVATE | SWP_FRAMECHANGED | SWP_NOSIZE);
+}
+
+$execute {
+    if(!Mod::get()->addHook(
+        reinterpret_cast<void*>(base::getCocos() + 0x111f80),
+        &centerWindowOrSmth,
+        "centerWindow",
+        tulip::hook::TulipConvention::Cdecl
+    ))
+        log::error("failed to hook centerWindow");
+}
 
 struct CustomVideoOptionsLayer : geode::Modify<CustomVideoOptionsLayer, VideoOptionsLayer> {
     bool m_isBorderless = isBorderless();

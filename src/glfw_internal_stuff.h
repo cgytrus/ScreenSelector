@@ -49,8 +49,8 @@ struct _GLFWlibrary {
     } hints;
 };
 
-/*struct GLFWwindow {
-    struct GLFWwindow* next;
+struct GLFWwindow {
+    GLFWwindow* next;
 
     // Window settings and state
     GLboolean resizable;
@@ -70,6 +70,8 @@ struct _GLFWlibrary {
     int cursorMode;
     char mouseButtons[GLFW_MOUSE_BUTTON_LAST + 1];
     char keys[GLFW_KEY_LAST + 1];
+    int width, height;
+    int32_t idk2[5];
 
     // OpenGL extensions and context attributes
     struct {
@@ -110,22 +112,18 @@ struct _GLFWlibrary {
         // The last received cursor position, regardless of source
         int cursorPosX, cursorPosY;
     } win32;
-};*/
+};
 
 _GLFWlibrary* _glfw = nullptr;
 GLFWvidmode* (*_glfwGetVideoMode)(GLFWmonitor* handle) = nullptr;
-//void (*_glfwSetWindowPos)(GLFWwindow* handle, int xpos, int ypos) = nullptr;
 void (*_glfwGetMonitorPos)(GLFWmonitor* handle, int* xpos, int* ypos) = nullptr;
 GLFWmonitor** (*_glfwGetMonitors)(int* count) = nullptr;
 
 void findGlfw() {
-    if(!_glfw || !_glfwGetVideoMode || /*!_glfwSetWindowPos || */!_glfwGetMonitorPos || !_glfwGetMonitors) {
+    if(!_glfw || !_glfwGetVideoMode || !_glfwGetMonitorPos || !_glfwGetMonitors) {
 #ifdef GEODE_IS_WINDOWS
         _glfw = reinterpret_cast<_GLFWlibrary*>(geode::base::getCocos() + 0x1a14a0);
         _glfwGetVideoMode = reinterpret_cast<GLFWvidmode*(*)(GLFWmonitor*)>(geode::base::getCocos() + 0x110ce0);
-        // please fucking kill me already i cant set the window position glfwsetwindowpos doesnt work winapi doesnt work
-        // does anything in gd or cocos ever fucking work
-        //_glfwSetWindowPos = reinterpret_cast<void(*)(GLFWwindow*, int, int)>(geode::base::getCocos() + 0x111630);
         _glfwGetMonitorPos = reinterpret_cast<void(*)(GLFWmonitor*, int*, int*)>(geode::base::getCocos() + 0x114ea0);
         _glfwGetMonitors = reinterpret_cast<GLFWmonitor**(*)(int*)>(geode::base::getCocos() + 0x114f20);
 #else
