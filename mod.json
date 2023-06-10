@@ -1,7 +1,7 @@
 {
     "geode": "1.0.0",
     "version": "v2.0.0",
-    "id": "config.screenselector",
+    "id": "cgytrus.screenselector",
     "name": "Screen Selector",
     "developer": "ConfiG",
     "description": "Select screen and borderless windowed mode",
