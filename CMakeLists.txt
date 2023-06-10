@@ -1,41 +1,18 @@
-cmake_minimum_required(VERSION 3.0.0)
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.3.0)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(PROJECT_NAME ScreenSelector)
-project(${PROJECT_NAME})
-
-find_file(WINDOWS_HEADER windows.h)
-if(NOT WINDOWS_HEADER)
-  message(FATAL_ERROR "Can't find windows.h!")
-endif()
+project(ScreenSelector VERSION 1.0.0)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-  libraries/hackpro
-  libraries/minhook/include
-  libraries/gd.h/include
-  libraries/gd.h
-  libraries/cocos-headers/
-  libraries/cocos-headers/extensions
-  libraries/cocos-headers/cocos2dx
-  libraries/cocos-headers/cocos2dx/include
-  libraries/cocos-headers/cocos2dx/kazmath/include
-  libraries/cocos-headers/cocos2dx/platform/win32
-  libraries/cocos-headers/cocos2dx/platform/third_party/win32
-  libraries/cocos-headers/cocos2dx/platform/third_party/win32/OGLES
-)
+if (NOT DEFINED ENV{GEODE_SDK})
+  message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
+else()
+  message(STATUS "Found Geode: $ENV{GEODE_SDK}")
+endif()
 
-add_subdirectory(libraries/minhook)
-target_link_libraries(${PROJECT_NAME} minhook)
+add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/libraries/hackpro/hackpro.lib)
-target_link_options(${PROJECT_NAME} PRIVATE "/DELAYLOAD:hackpro.dll")
-
-target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/libcocos2d.lib)
-target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/extensions/libExtensions.lib)
-target_link_libraries(${PROJECT_NAME} opengl32 ${CMAKE_SOURCE_DIR}/libraries/glew32.lib)
-target_link_libraries(${PROJECT_NAME} opengl32 ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/robtop/glfw/glfw3.lib)
+setup_geode_mod(${PROJECT_NAME})
